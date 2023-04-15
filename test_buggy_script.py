@@ -1,5 +1,4 @@
 from buggy_script import calculate
-from termcolor import cprint
 
 def test_subtract():
     assert calculate("subtract", 20, 3) == 17
