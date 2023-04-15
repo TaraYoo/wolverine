@@ -187,9 +187,12 @@ def main(script_name, test_name, retry_limit, revert=False, model=DEFAULT_MODEL)
     # Make a backup of the original script
     shutil.copy(script_name, script_name + ".bak")
 
-
     tried_count = 0
-    while tried_count < int(retry_limit):
+    returncode = 1
+    while tried_count < int(retry_limit) and returncode != 0:
+        cprint("===========================", "red")
+        cprint(f"attempt: {tried_count}", "red")
+        cprint("===========================", "red")
         tried_count += 1
     
         output, returncode = run_test(test_name)
@@ -213,7 +216,6 @@ def main(script_name, test_name, retry_limit, revert=False, model=DEFAULT_MODEL)
             if json_response: 
                 apply_changes(script_name, json_response)
                 cprint("Changes applied. Rerunning...", "blue")
-                break
                 
 
 
