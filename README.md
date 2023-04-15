@@ -7,6 +7,7 @@ I don't have a GPT-4 API key yet, so I tested this using GPT 3.5
 
 This PROTOTYPE branch drastically changed the existing interface. I'm planning to put in smaller PRs later that preserves the original interface. This is just a proof of concept.
 
+example of chatgpt attempting to fix this script until it runs out of retry attempts [Screencast from 04-15-2023 06:46:01 PM.webm](https://user-images.githubusercontent.com/38822072/232256332-70ef4659-5864-4c9b-b3e8-c62c049f376e.webm)
 
 ## Setup
 
