@@ -28,15 +28,11 @@ _warning!_ By default wolverine uses GPT-4 ~~and may make many repeated calls to
 
 To run with gpt-4 (the default, tested option) and retry up to 5 times:
 
-    ```python3
     python wolverine.py buggy_script.py test_buggy_script.py 5
-    ```
     
 essentially, run 
 
-    ```python3
     python wolverine.py <script.py> <test_file.py> <retry_limit>
-    ```
     
 You can also run with other models, but be warned they may not adhere to the edit format as well:
 
