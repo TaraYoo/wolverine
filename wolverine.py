@@ -31,6 +31,13 @@ def run_script(script_name, script_args):
         return e.output.decode("utf-8"), e.returncode
     return result.decode("utf-8"), 0
 
+def run_test(test_name):
+    try:
+        result = subprocess.check_output(["pytest", test_name], stderr=subprocess.STDOUT)
+        cprint(result, "green")
+    except subprocess.CalledProcessError as e:
+        return e.output.decode("utf-8"), e.returncode
+    return result.decode("utf-8", 0)
 
 def json_validated_response(model, messages):
     """
@@ -45,6 +52,7 @@ def json_validated_response(model, messages):
     )
     messages.append(response.choices[0].message)
     content = response.choices[0].message.content
+    cprint(f"{messages}", "yellow")
     # see if json can be parsed
     try:
         json_start_index = content.index(
@@ -65,13 +73,18 @@ def json_validated_response(model, messages):
                 "content": "Your response could not be parsed by json.loads. Please restate your last message as pure JSON.",
             }
         )
-        # rerun the api call
-        return json_validated_response(model, messages)
+        return {
+            "is_valid": False,
+            "json_response": None
+        }
     except Exception as e:
         cprint(f"Unknown error: {e}", "red")
         cprint(f"\nGPT RESPONSE:\n\n{content}\n\n", "yellow")
         raise e
-    return json_response
+    return {
+        "is_valid": True,
+        "json_response": json_response
+    }
 
 
 def send_error_to_gpt(file_path, args, error_message, model=DEFAULT_MODEL):
@@ -86,15 +99,12 @@ def send_error_to_gpt(file_path, args, error_message, model=DEFAULT_MODEL):
     prompt = (
         "Here is the script that needs fixing:\n\n"
         f"{file_with_lines}\n\n"
-        "Here are the arguments it was provided:\n\n"
-        f"{args}\n\n"
-        "Here is the error message:\n\n"
+        "Here is the test result:\n\n"
         f"{error_message}\n"
         "Please provide your suggested changes, and remember to stick to the "
         "exact format as described above."
     )
 
-    # print(prompt)
     messages = [
         {
             "role": "system",
@@ -105,8 +115,13 @@ def send_error_to_gpt(file_path, args, error_message, model=DEFAULT_MODEL):
             "content": prompt,
         },
     ]
+    cprint(messages, "yellow")
+    response_attempt = json_validated_response(model, messages)
 
-    return json_validated_response(model, messages)
+    if response_attempt["is_valid"]:
+        return response_attempt["json_response"]
+
+    return False
 
 
 def apply_changes(file_path, changes: list):
@@ -158,7 +173,7 @@ def apply_changes(file_path, changes: list):
             print(line, end="")
 
 
-def main(script_name, *script_args, revert=False, model=DEFAULT_MODEL):
+def main(script_name, test_name, retry_limit, revert=False, model=DEFAULT_MODEL):
     if revert:
         backup_file = script_name + ".bak"
         if os.path.exists(backup_file):
@@ -172,26 +187,35 @@ def main(script_name, *script_args, revert=False, model=DEFAULT_MODEL):
     # Make a backup of the original script
     shutil.copy(script_name, script_name + ".bak")
 
-    while True:
-        output, returncode = run_script(script_name, script_args)
+
+    tried_count = 0
+    while tried_count < int(retry_limit):
+        tried_count += 1
+    
+        output, returncode = run_test(test_name)
 
         if returncode == 0:
-            cprint("Script ran successfully.", "blue")
+            cprint("Tests passed", "blue")
             print("Output:", output)
             break
+
         else:
-            cprint("Script crashed. Trying to fix...", "blue")
+            cprint("Test failed. Trying to fix...", "blue")
             print("Output:", output)
 
             json_response = send_error_to_gpt(
                 file_path=script_name,
-                args=script_args,
+                args=[],
                 error_message=output,
                 model=model,
             )
 
-            apply_changes(script_name, json_response)
-            cprint("Changes applied. Rerunning...", "blue")
+            if json_response: 
+                apply_changes(script_name, json_response)
+                cprint("Changes applied. Rerunning...", "blue")
+                break
+                
+
 
 
 if __name__ == "__main__":
