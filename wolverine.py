@@ -34,7 +34,6 @@ def run_script(script_name, script_args):
 def run_test(test_name):
     try:
         result = subprocess.check_output(["pytest", test_name], stderr=subprocess.STDOUT)
-        cprint(result, "green")
     except subprocess.CalledProcessError as e:
         return e.output.decode("utf-8"), e.returncode
     return result.decode("utf-8", 0)
@@ -52,7 +51,6 @@ def json_validated_response(model, messages):
     )
     messages.append(response.choices[0].message)
     content = response.choices[0].message.content
-    cprint(f"{messages}", "yellow")
     # see if json can be parsed
     try:
         json_start_index = content.index(
@@ -115,7 +113,6 @@ def send_error_to_gpt(file_path, args, error_message, model=DEFAULT_MODEL):
             "content": prompt,
         },
     ]
-    cprint(messages, "yellow")
     response_attempt = json_validated_response(model, messages)
 
     if response_attempt["is_valid"]:
@@ -199,12 +196,10 @@ def main(script_name, test_name, retry_limit, revert=False, model=DEFAULT_MODEL)
 
         if returncode == 0:
             cprint("Tests passed", "blue")
-            print("Output:", output)
             break
 
         else:
             cprint("Test failed. Trying to fix...", "blue")
-            print("Output:", output)
 
             json_response = send_error_to_gpt(
                 file_path=script_name,

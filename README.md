@@ -7,11 +7,6 @@ I don't have a GPT-4 API key yet, so I tested this using GPT 3.5
 
 This PROTOTYPE branch drastically changed the existing interface. I'm planning to put in smaller PRs later that preserves the original interface. This is just a proof of concept.
 
-Give your python scripts regenerative healing abilities!
-
-Run your scripts with Wolverine and when they crash, GPT-4 edits them and explains what went wrong. Even if you have many bugs it will repeatedly rerun until it's fixed.
-
-For a quick demonstration see my [demo video on twitter](https://twitter.com/bio_bootloader/status/1636880208304431104).
 
 ## Setup
 
