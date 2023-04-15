@@ -50,15 +50,3 @@ If you want to use GPT-3.5 by default instead of GPT-4 uncomment the default mod
 - add a test mode that doesn't actually make calls, but shows an example of what the back and forth message would look like
 - gracefully integrate this PoC instead of completely changing the interface.
 
-This is just a quick prototype I threw together in a few hours. There are many possible extensions and contributions are welcome:
-
-- add flags to customize usage, such as asking for user confirmation before running changed code
-- further iterations on the edit format that GPT responds in. Currently it struggles a bit with indentation, but I'm sure that can be improved
-- a suite of example buggy files that we can test prompts on to ensure reliability and measure improvement
-- multiple files / codebases: send GPT everything that appears in the stacktrace
-- graceful handling of large files - should we just send GPT relevant classes / functions?
-- extension to languages other than python
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=biobootloader/wolverine&type=Date)](https://star-history.com/#biobootloader/wolverine)
